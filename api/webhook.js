@@ -7,6 +7,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status: 'active',
       service: 'Apple Farm Support Bot API',
+      hasToken: Boolean(config.botToken && config.botToken.length > 10),
       timestamp: new Date().toISOString()
     });
   }
