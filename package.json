@@ -1,0 +1,18 @@
+{
+  "name": "apple-farm-support-bot",
+  "version": "1.0.0",
+  "description": "Worldwide Telegram Support Center & Business Bot for Apple Farm (100% Standalone)",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true
+}
