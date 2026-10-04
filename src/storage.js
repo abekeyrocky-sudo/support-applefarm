@@ -4,12 +4,19 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.join(__dirname, '..', 'data');
+
+// In Vercel serverless environment, use /tmp which is writable
+const isServerless = process.env.VERCEL === '1' || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DATA_DIR = isServerless ? '/tmp/apple_support_data' : path.join(__dirname, '..', 'data');
 const TICKETS_FILE = path.join(DATA_DIR, 'tickets.json');
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Safely ensure data directory exists
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn('⚠️ [Storage] Could not create storage directory, using in-memory only:', err.message);
 }
 
 // In-memory cache for fast access
@@ -22,22 +29,27 @@ function loadTickets() {
       const raw = fs.readFileSync(TICKETS_FILE, 'utf8');
       const list = JSON.parse(raw);
       ticketsMap = new Map(list.map(t => [t.id, t]));
-      console.log(`📦 [Standalone Storage] Loaded ${ticketsMap.size} tickets from local storage.`);
+      console.log(`📦 [Storage] Loaded ${ticketsMap.size} tickets.`);
     } else {
-      fs.writeFileSync(TICKETS_FILE, JSON.stringify([], null, 2), 'utf8');
+      try {
+        fs.writeFileSync(TICKETS_FILE, JSON.stringify([], null, 2), 'utf8');
+      } catch (e) {
+        // Ignore if read-only
+      }
     }
   } catch (err) {
-    console.error('⚠️ [Storage Load Error]:', err.message);
+    console.warn('⚠️ [Storage Load Warning]:', err.message);
   }
 }
 
-// Save all tickets to disk
+// Save all tickets to disk safely
 function saveTickets() {
   try {
     const list = Array.from(ticketsMap.values());
     fs.writeFileSync(TICKETS_FILE, JSON.stringify(list, null, 2), 'utf8');
   } catch (err) {
-    console.error('⚠️ [Storage Save Error]:', err.message);
+    // If running in a read-only environment, keep in memory without throwing
+    console.warn('⚠️ [Storage Save Warning]: keeping in memory only');
   }
 }
 

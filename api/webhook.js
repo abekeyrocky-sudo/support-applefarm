@@ -23,9 +23,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const update = req.body;
-    // Process update asynchronously or synchronously
-    await processTelegramUpdate(update);
+    let update = req.body;
+    if (typeof update === 'string') {
+      try {
+        update = JSON.parse(update);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // Process update
+    if (update) {
+      await processTelegramUpdate(update);
+    }
     return res.status(200).json({ ok: true });
   } catch (error) {
     console.error('💥 [Webhook Error]:', error);
