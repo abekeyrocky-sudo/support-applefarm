@@ -51,7 +51,7 @@ export const en = {
       `Submitted: ${new Date(ticket.createdAt).toUTCString()}\n` +
       `Status: <b>${ticket.status.toUpperCase()}</b>\n` +
       `Issue: ${escapeHtml(ticket.message)}\n` +
-      (ticket.adminReply ? `\nAdmin Response:\n<i>${escapeHtml(ticket.adminReply)}</i>` : `\n<i>Our support team is currently investigating your ticket.</i>`)
+      (ticket.adminReply ? `\nSupport Team Response:\n<i>${escapeHtml(ticket.adminReply)}</i>` : `\n<i>Our support team is currently investigating your ticket.</i>`)
   },
 
   businessAutoReply: {

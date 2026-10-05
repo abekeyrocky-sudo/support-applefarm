@@ -88,7 +88,7 @@ export async function handleAdminCommands(message) {
       return true;
     }
 
-    await resolveTicket(ticketId, 'Manually closed by Admin', 'resolved');
+    await resolveTicket(ticketId, 'Resolved by Support Team', 'resolved');
     await sendMessage(chatId, `✅ Ticket <code>${ticketId}</code> marked as resolved.`);
 
     await sendMessage(

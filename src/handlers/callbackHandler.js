@@ -150,7 +150,7 @@ export async function handleCallbackQuery(callbackQuery) {
     const ticket = await getTicketById(ticketId);
 
     if (ticket) {
-      await resolveTicket(ticketId, 'Resolved by Admin', 'resolved');
+      await resolveTicket(ticketId, 'Resolved by Support Team', 'resolved');
 
       // Edit admin card
       await updateMessage(chatId, message, `<b>TICKET RESOLVED</b>\nTicket ID: <code>${ticketId}</code>\nUser: <code>${ticket.userId}</code>`);
