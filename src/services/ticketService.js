@@ -15,11 +15,12 @@ export function generateTicketId() {
 /**
  * Create a new support ticket in standalone storage
  */
-export async function createTicket({ userId, username, firstName, category, message, photoFileId = null }) {
+export async function createTicket({ userId, username, firstName, category, message, farmerId = null, photoFileId = null }) {
   const ticketId = generateTicketId();
   const ticketData = {
     id: ticketId,
     userId: String(userId),
+    farmerId: farmerId ? String(farmerId).replace('#', '').trim() : null,
     username: username || '',
     firstName: firstName || 'User',
     category: category || 'General Inquiry',

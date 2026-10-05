@@ -5,7 +5,22 @@ import { userSessions } from './callbackHandler.js';
 import { createTicket, linkAdminMessage } from '../services/ticketService.js';
 import { handleAdminReply, handleAdminCommands } from './adminHandler.js';
 
-const BANNER_URL = 'https://apple-farm-plum.vercel.app/help-image.jpg';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const LOCAL_START_IMG = path.join(__dirname, '../../assets/support-bot-start-img.jpg');
+const TELEGRAM_START_IMAGE_ID = 'AgACAgUAAxkDAANNasNRlWyeLsKJqiNUhIckRynEHnAAAqsSaxtwTxhWVucaHRtTI8IBAAMCAANzAAM9BA';
+const FALLBACK_BANNER_URL = 'https://raw.githubusercontent.com/abekeyrocky-sudo/support-applefarm/main/assets/support-bot-start-img.jpg';
+
+function getStartImage() {
+  if (fs.existsSync(LOCAL_START_IMG)) {
+    return LOCAL_START_IMG;
+  }
+  return TELEGRAM_START_IMAGE_ID || FALLBACK_BANNER_URL;
+}
 
 export async function handleIncomingMessage(message) {
   if (!message) return;
@@ -51,7 +66,7 @@ export async function handleIncomingMessage(message) {
     };
 
     // Try sending rich photo banner first
-    const photoRes = await sendPhoto(chatId, BANNER_URL, caption, { reply_markup: keyboard });
+    const photoRes = await sendPhoto(chatId, getStartImage(), caption, { reply_markup: keyboard });
     if (!photoRes || !photoRes.ok) {
       return sendMessage(chatId, caption, { reply_markup: keyboard });
     }
@@ -61,7 +76,7 @@ export async function handleIncomingMessage(message) {
   if (text === '/help') {
     return sendMessage(
       chatId,
-      `ℹ️ <b>Apple Farm Help Center</b>\n\nUse the buttons below to open a ticket or check our frequently asked questions:`,
+      `<b>Apple Farm Help Center</b>\n\nUse the buttons below to open a ticket or check our frequently asked questions:`,
       {
         reply_markup: {
           inline_keyboard: [
@@ -73,8 +88,37 @@ export async function handleIncomingMessage(message) {
     );
   }
 
-  // 3. User is actively submitting ticket details
+  // 3. User is in ticket creation flow
   const session = userSessions.get(userId);
+
+  // Step 3a: Waiting for Farmer ID
+  if (session && session.step === 'WAITING_FOR_FARMER_ID') {
+    const rawNumber = text.replace(/[^0-9]/g, '');
+
+    if (!rawNumber || rawNumber.length < 3) {
+      return sendMessage(chatId, en.ticketPrompt.invalidFarmerId, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: en.buttons.cancel, callback_data: 'action:main_menu', style: 'danger' }]
+          ]
+        }
+      });
+    }
+
+    // Farmer ID is valid, proceed to issue description step
+    session.farmerId = rawNumber;
+    session.step = 'WAITING_FOR_TICKET_DETAILS';
+
+    return sendMessage(chatId, en.ticketPrompt.askDetails(rawNumber), {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: en.buttons.cancel, callback_data: 'action:main_menu', style: 'danger' }]
+        ]
+      }
+    });
+  }
+
+  // Step 3b: Waiting for Ticket Details & Screenshot
   if (session && session.step === 'WAITING_FOR_TICKET_DETAILS') {
     let photoFileId = null;
     if (message.photo && message.photo.length > 0) {
@@ -82,12 +126,13 @@ export async function handleIncomingMessage(message) {
     }
 
     if (!text && !photoFileId) {
-      return sendMessage(chatId, "⚠️ Please provide a text description or a screenshot of your issue.");
+      return sendMessage(chatId, "Please provide a text description or a screenshot of your issue.");
     }
 
     // Create ticket in standalone storage
     const ticket = await createTicket({
       userId: userId,
+      farmerId: session.farmerId,
       username: message.from.username,
       firstName: message.from.first_name,
       category: session.category,
@@ -99,7 +144,7 @@ export async function handleIncomingMessage(message) {
     userSessions.delete(userId);
 
     // 1) Send confirmation to User
-    await sendMessage(chatId, en.ticketPrompt.created(ticket.id), {
+    await sendMessage(chatId, en.ticketPrompt.created(ticket.id, session.farmerId), {
       reply_markup: {
         inline_keyboard: [
           [{ text: en.buttons.checkStatus, callback_data: 'action:check_status', style: 'primary' }],
@@ -141,7 +186,7 @@ export async function handleIncomingMessage(message) {
   if (isPrivate && !text.startsWith('/')) {
     return sendMessage(
       chatId,
-      `👋 Hello! To open a support ticket or ask a question, please tap below:`,
+      `Hello! To open a support ticket or ask a question, please tap below:`,
       {
         reply_markup: {
           inline_keyboard: [

@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { config } from './config.js';
 
 const TELEGRAM_API = `https://api.telegram.org/bot${config.botToken}`;
@@ -52,9 +54,39 @@ export async function sendMessage(chatId, text, options = {}) {
 }
 
 /**
- * Send a photo with caption
+ * Send a photo with caption (supports URLs, Telegram file_id, and local file paths)
  */
 export async function sendPhoto(chatId, photo, caption = '', options = {}) {
+  // If photo is a local file path that exists on disk, upload via FormData
+  if (typeof photo === 'string' && (photo.endsWith('.jpg') || photo.endsWith('.png') || photo.endsWith('.jpeg')) && fs.existsSync(photo)) {
+    try {
+      const fileBuffer = fs.readFileSync(photo);
+      const formData = new FormData();
+      formData.append('chat_id', String(chatId));
+      formData.append('photo', new Blob([fileBuffer], { type: 'image/jpeg' }), path.basename(photo));
+      if (caption) formData.append('caption', caption);
+      formData.append('parse_mode', options.parse_mode !== undefined ? options.parse_mode : 'HTML');
+      if (options.reply_markup) {
+        formData.append('reply_markup', typeof options.reply_markup === 'string' ? options.reply_markup : JSON.stringify(options.reply_markup));
+      }
+      if (options.business_connection_id) {
+        formData.append('business_connection_id', options.business_connection_id);
+      }
+
+      const res = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        console.error('⚠️ [Telegram sendPhoto FormData error]:', data.description);
+      }
+      return data;
+    } catch (err) {
+      console.error('⚠️ [sendPhoto local file error]:', err.message);
+    }
+  }
+
   const payload = {
     chat_id: chatId,
     photo: photo,

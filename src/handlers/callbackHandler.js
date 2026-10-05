@@ -68,16 +68,16 @@ export async function handleCallbackQuery(callbackQuery) {
       other: 'General & Account Issue'
     }[catKey] || 'General Support';
 
-    // Store state in session
+    // Store state in session: ask for Farmer ID first
     userSessions.set(userId, {
-      step: 'WAITING_FOR_TICKET_DETAILS',
+      step: 'WAITING_FOR_FARMER_ID',
       category: categoryName
     });
 
     return updateMessage(
       chatId, 
       message, 
-      `<b>Selected Category:</b> ${escapeHtml(categoryName)}\n\n${en.ticketPrompt.description}`,
+      en.ticketPrompt.askFarmerId(categoryName),
       {
         reply_markup: {
           inline_keyboard: [

@@ -36,8 +36,14 @@ export const en = {
   },
 
   ticketPrompt: {
-    description: "<b>Please describe your issue in detail:</b>\n\nInclude any relevant details (e.g. your TON wallet address, transaction amount, or error message). You can also attach a screenshot directly with your message.",
-    created: (ticketId) => `<b>Your Ticket has been submitted successfully!</b>\n\nTicket ID: <code>${ticketId}</code>\nStatus: <b>IN REVIEW</b>\n\nOur support team has received your ticket and will reply directly to your Telegram inbox. Thank you for your patience!`,
+    askFarmerId: (categoryName) =>
+      `<b>Selected Category:</b> ${escapeHtml(categoryName)}\n\n` +
+      `Please send your <b>Farmer ID</b> (found at the top of your in-game Farmer Passport, e.g. <code>1234567890</code>):`,
+    askDetails: (farmerId) =>
+      `Farmer ID: <code>#${escapeHtml(farmerId)}</code> confirmed.\n\n` +
+      `Now, please describe your issue in detail. You can also attach a <b>screenshot</b> directly with your message.`,
+    invalidFarmerId: "Please provide a valid Farmer ID (numbers only, e.g. <code>1234567890</code>). You can find it inside your in-game Farmer Passport.",
+    created: (ticketId, farmerId) => `<b>Your Ticket has been submitted successfully!</b>\n\nTicket ID: <code>${ticketId}</code>\nFarmer ID: <code>#${escapeHtml(farmerId || 'N/A')}</code>\nStatus: <b>IN REVIEW</b>\n\nOur support team has received your ticket and will reply directly to your Telegram inbox. Thank you for your patience!`,
     cancelled: "Ticket creation was cancelled. Feel free to reach out anytime."
   },
 
@@ -47,6 +53,7 @@ export const en = {
       `<b>Ticket Details:</b>\n` +
       `━━━━━━━━━━━━━━━━━━━\n` +
       `Ticket ID: <code>${ticket.id}</code>\n` +
+      `Farmer ID: <code>#${escapeHtml(ticket.farmerId || 'N/A')}</code>\n` +
       `Category: ${escapeHtml(ticket.category)}\n` +
       `Submitted: ${new Date(ticket.createdAt).toUTCString()}\n` +
       `Status: <b>${ticket.status.toUpperCase()}</b>\n` +
@@ -56,9 +63,9 @@ export const en = {
 
   businessAutoReply: {
     greeting: (userName) => 
-      `Hello ${escapeHtml(userName || 'there')}!\n\n` +
+      `👋 Hello ${escapeHtml(userName || 'there')}!\n\n` +
       `Thank you for contacting <b>Apple Farm Official Support</b>.\n\n` +
-      `How can we assist you today? Please reply with your issue details or wallet address, or tap the button below to open a support ticket directly with our team.`
+      `How can we assist you today? Please reply with your <b>Farmer ID</b> (from your in-game Farmer Passport) and issue details, or tap the button below to open a support ticket directly with our team.`
   },
 
   faq: {
@@ -88,6 +95,7 @@ export const en = {
       `<b>NEW SUPPORT TICKET</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `Ticket ID: <code>${ticket.id}</code>\n` +
+      `Farmer ID: <code>#${escapeHtml(ticket.farmerId || 'N/A')}</code>\n` +
       `User: ${escapeHtml(ticket.firstName)} (@${escapeHtml(ticket.username || 'N/A')})\n` +
       `User ID: <code>${ticket.userId}</code>\n` +
       `Category: <b>${escapeHtml(ticket.category)}</b>\n` +
