@@ -1,4 +1,4 @@
-import { sendMessage, editMessageText, answerCallbackQuery } from '../telegram.js';
+import { sendMessage, updateMessage, answerCallbackQuery } from '../telegram.js';
 import { en, escapeHtml } from '../locales/en.js';
 import { config } from '../config.js';
 import { getLatestUserTicket, getTicketById, resolveTicket } from '../services/ticketService.js';
@@ -11,8 +11,8 @@ export const userSessions = new Map();
  */
 export async function handleCallbackQuery(callbackQuery) {
   const data = callbackQuery.data;
-  const chatId = callbackQuery.message?.chat?.id;
-  const messageId = callbackQuery.message?.message_id;
+  const message = callbackQuery.message;
+  const chatId = message?.chat?.id;
   const userId = callbackQuery.from.id;
   const queryId = callbackQuery.id;
 
@@ -22,7 +22,7 @@ export async function handleCallbackQuery(callbackQuery) {
   if (data === 'action:main_menu') {
     await answerCallbackQuery(queryId);
     userSessions.delete(userId);
-    return editMessageText(chatId, messageId, `${en.welcome.title}\n\n${en.welcome.subtitle}\n\n${en.welcome.chooseOption}`, {
+    return updateMessage(chatId, message, `${en.welcome.title}\n\n${en.welcome.subtitle}\n\n${en.welcome.chooseOption}`, {
       reply_markup: {
         inline_keyboard: [
           [
@@ -44,7 +44,7 @@ export async function handleCallbackQuery(callbackQuery) {
   // 2. Open Ticket: Select Category
   if (data === 'action:open_ticket') {
     await answerCallbackQuery(queryId);
-    return editMessageText(chatId, messageId, `${en.categories.title}\n\n${en.categories.prompt}`, {
+    return updateMessage(chatId, message, `${en.categories.title}\n\n${en.categories.prompt}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: en.categories.withdraw, callback_data: 'cat:withdraw', style: 'primary' }],
@@ -74,9 +74,9 @@ export async function handleCallbackQuery(callbackQuery) {
       category: categoryName
     });
 
-    return editMessageText(
+    return updateMessage(
       chatId, 
-      messageId, 
+      message, 
       `📂 <b>Selected Category:</b> ${escapeHtml(categoryName)}\n\n${en.ticketPrompt.description}`,
       {
         reply_markup: {
@@ -93,7 +93,7 @@ export async function handleCallbackQuery(callbackQuery) {
     await answerCallbackQuery(queryId);
     const latest = await getLatestUserTicket(userId);
     if (!latest) {
-      return editMessageText(chatId, messageId, en.status.noTickets, {
+      return updateMessage(chatId, message, en.status.noTickets, {
         reply_markup: {
           inline_keyboard: [
             [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }],
@@ -103,7 +103,7 @@ export async function handleCallbackQuery(callbackQuery) {
       });
     }
 
-    return editMessageText(chatId, messageId, en.status.ticketDetails(latest), {
+    return updateMessage(chatId, message, en.status.ticketDetails(latest), {
       reply_markup: {
         inline_keyboard: [
           [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }],
@@ -121,7 +121,7 @@ export async function handleCallbackQuery(callbackQuery) {
     ]);
     buttons.push([{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]);
 
-    return editMessageText(chatId, messageId, `${en.faq.title}\n\nSelect a question to view the answer:`, {
+    return updateMessage(chatId, message, `${en.faq.title}\n\nSelect a question to view the answer:`, {
       reply_markup: { inline_keyboard: buttons }
     });
   }
@@ -132,7 +132,7 @@ export async function handleCallbackQuery(callbackQuery) {
     const index = parseInt(data.replace('faq:item_', ''), 10);
     const item = en.faq.items[index];
     if (item) {
-      return editMessageText(chatId, messageId, `❓ <b>${escapeHtml(item.q)}</b>\n\n${escapeHtml(item.a)}`, {
+      return updateMessage(chatId, message, `❓ <b>${escapeHtml(item.q)}</b>\n\n${escapeHtml(item.a)}`, {
         reply_markup: {
           inline_keyboard: [
             [{ text: '🔙 Back to FAQs', callback_data: 'action:faq', style: 'primary' }],
@@ -153,7 +153,7 @@ export async function handleCallbackQuery(callbackQuery) {
       await resolveTicket(ticketId, 'Resolved by Admin', 'resolved');
 
       // Edit admin card
-      await editMessageText(chatId, messageId, `✅ <b>TICKET RESOLVED</b>\nTicket ID: <code>${ticketId}</code>\nUser: <code>${ticket.userId}</code>`);
+      await updateMessage(chatId, message, `✅ <b>TICKET RESOLVED</b>\nTicket ID: <code>${ticketId}</code>\nUser: <code>${ticket.userId}</code>`);
 
       // Notify User
       await sendMessage(

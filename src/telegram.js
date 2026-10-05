@@ -84,6 +84,38 @@ export async function editMessageText(chatId, messageId, text, options = {}) {
 }
 
 /**
+ * Edit existing photo message caption
+ */
+export async function editMessageCaption(chatId, messageId, caption, options = {}) {
+  return callTelegram('editMessageCaption', {
+    chat_id: chatId,
+    message_id: messageId,
+    caption: caption,
+    parse_mode: options.parse_mode !== undefined ? options.parse_mode : 'HTML',
+    ...options
+  });
+}
+
+/**
+ * Smart helper: seamlessly edits either text message or photo caption
+ */
+export async function updateMessage(chatId, msg, text, options = {}) {
+  const messageId = typeof msg === 'object' ? msg?.message_id : msg;
+  const hasPhoto = Boolean(typeof msg === 'object' && msg?.photo && msg.photo.length > 0);
+
+  if (hasPhoto) {
+    const captionRes = await editMessageCaption(chatId, messageId, text, options);
+    if (captionRes && captionRes.ok) return captionRes;
+  }
+
+  const textRes = await editMessageText(chatId, messageId, text, options);
+  if (textRes && textRes.ok) return textRes;
+
+  // Fallback: send fresh message if editing is not allowed
+  return sendMessage(chatId, text, options);
+}
+
+/**
  * Answer inline button callback query
  */
 export async function answerCallbackQuery(callbackQueryId, text = '', showAlert = false) {
