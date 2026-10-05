@@ -1,6 +1,6 @@
 import { sendMessage, editMessageText, answerCallbackQuery } from '../telegram.js';
 import { en, escapeHtml } from '../locales/en.js';
-import { config, isAdmin } from '../config.js';
+import { config } from '../config.js';
 import { getLatestUserTicket, getTicketById, resolveTicket } from '../services/ticketService.js';
 
 // In-memory user state map: userId -> { step: 'WAITING_FOR_TICKET_DETAILS', category: string }
@@ -26,15 +26,15 @@ export async function handleCallbackQuery(callbackQuery) {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: en.buttons.openTicket, callback_data: 'action:open_ticket' },
-            { text: en.buttons.checkStatus, callback_data: 'action:check_status' }
+            { text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }
           ],
           [
-            { text: en.buttons.faq, callback_data: 'action:faq' },
-            { text: en.buttons.playGame, url: config.miniAppUrl }
+            { text: en.buttons.checkStatus, callback_data: 'action:check_status', style: 'primary' },
+            { text: en.buttons.faq, callback_data: 'action:faq', style: 'primary' }
           ],
           [
-            { text: en.buttons.community, url: config.channelUrl }
+            { text: en.buttons.playGame, url: config.miniAppUrl, style: 'success' },
+            { text: en.buttons.community, url: config.channelUrl, style: 'primary' }
           ]
         ]
       }
@@ -47,10 +47,10 @@ export async function handleCallbackQuery(callbackQuery) {
     return editMessageText(chatId, messageId, `${en.categories.title}\n\n${en.categories.prompt}`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: en.categories.withdraw, callback_data: 'cat:withdraw' }],
-          [{ text: en.categories.referral, callback_data: 'cat:referral' }],
-          [{ text: en.categories.spinTask, callback_data: 'cat:spintask' }],
-          [{ text: en.categories.other, callback_data: 'cat:other' }],
+          [{ text: en.categories.withdraw, callback_data: 'cat:withdraw', style: 'primary' }],
+          [{ text: en.categories.referral, callback_data: 'cat:referral', style: 'primary' }],
+          [{ text: en.categories.spinTask, callback_data: 'cat:spintask', style: 'primary' }],
+          [{ text: en.categories.other, callback_data: 'cat:other', style: 'primary' }],
           [{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]
         ]
       }
@@ -62,10 +62,10 @@ export async function handleCallbackQuery(callbackQuery) {
     await answerCallbackQuery(queryId);
     const catKey = data.replace('cat:', '');
     const categoryName = {
-      withdraw: 'Withdrawal / TON Payout',
-      referral: 'Referral Bonus / Friends',
-      spintask: 'Wheel Spin / Task Bug',
-      other: 'General / Account Issue'
+      withdraw: 'Withdrawal / TON Payout 💎',
+      referral: 'Referral Bonus / Friends 🎁',
+      spintask: 'Wheel Spin & Tasks Bug 🎯',
+      other: 'General & Account Issue 🛡️'
     }[catKey] || 'General Support';
 
     // Store state in session
@@ -81,7 +81,7 @@ export async function handleCallbackQuery(callbackQuery) {
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: en.buttons.cancel, callback_data: 'action:main_menu' }]
+            [{ text: en.buttons.cancel, callback_data: 'action:main_menu', style: 'danger' }]
           ]
         }
       }
@@ -96,7 +96,7 @@ export async function handleCallbackQuery(callbackQuery) {
       return editMessageText(chatId, messageId, en.status.noTickets, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket' }],
+            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }],
             [{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]
           ]
         }
@@ -106,6 +106,7 @@ export async function handleCallbackQuery(callbackQuery) {
     return editMessageText(chatId, messageId, en.status.ticketDetails(latest), {
       reply_markup: {
         inline_keyboard: [
+          [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }],
           [{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]
         ]
       }
@@ -116,7 +117,7 @@ export async function handleCallbackQuery(callbackQuery) {
   if (data === 'action:faq') {
     await answerCallbackQuery(queryId);
     const buttons = en.faq.items.map((item, index) => [
-      { text: item.q, callback_data: `faq:item_${index}` }
+      { text: item.q, callback_data: `faq:item_${index}`, style: 'primary' }
     ]);
     buttons.push([{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]);
 
@@ -134,8 +135,8 @@ export async function handleCallbackQuery(callbackQuery) {
       return editMessageText(chatId, messageId, `❓ <b>${escapeHtml(item.q)}</b>\n\n${escapeHtml(item.a)}`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🔙 Back to FAQs', callback_data: 'action:faq' }],
-            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket' }]
+            [{ text: '🔙 Back to FAQs', callback_data: 'action:faq', style: 'primary' }],
+            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }]
           ]
         }
       });

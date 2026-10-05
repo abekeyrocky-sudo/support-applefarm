@@ -5,6 +5,8 @@ import { userSessions } from './callbackHandler.js';
 import { createTicket, linkAdminMessage } from '../services/ticketService.js';
 import { handleAdminReply, handleAdminCommands } from './adminHandler.js';
 
+const BANNER_URL = 'https://apple-farm-plum.vercel.app/help-image.jpg';
+
 export async function handleIncomingMessage(message) {
   if (!message) return;
 
@@ -20,7 +22,7 @@ export async function handleIncomingMessage(message) {
       const handled = await handleAdminReply(message);
       if (handled) return;
     }
-    // Check if it's an admin slash command like /resolve
+    // Check if it's an admin slash command like /resolve or /tickets
     if (text.startsWith('/')) {
       const handled = await handleAdminCommands(message);
       if (handled) return;
@@ -30,27 +32,30 @@ export async function handleIncomingMessage(message) {
   // 2. Commands for regular private chats
   if (text === '/start' || text === '/menu') {
     userSessions.delete(userId);
-    return sendMessage(
-      chatId,
-      `${en.welcome.title}\n\n${en.welcome.subtitle}\n\n${en.welcome.chooseOption}`,
-      {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: en.buttons.openTicket, callback_data: 'action:open_ticket' },
-              { text: en.buttons.checkStatus, callback_data: 'action:check_status' }
-            ],
-            [
-              { text: en.buttons.faq, callback_data: 'action:faq' },
-              { text: en.buttons.playGame, url: config.miniAppUrl }
-            ],
-            [
-              { text: en.buttons.community, url: config.channelUrl }
-            ]
-          ]
-        }
-      }
-    );
+
+    const caption = `${en.welcome.title}\n\n${en.welcome.subtitle}\n\n${en.welcome.chooseOption}`;
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }
+        ],
+        [
+          { text: en.buttons.checkStatus, callback_data: 'action:check_status', style: 'primary' },
+          { text: en.buttons.faq, callback_data: 'action:faq', style: 'primary' }
+        ],
+        [
+          { text: en.buttons.playGame, url: config.miniAppUrl, style: 'success' },
+          { text: en.buttons.community, url: config.channelUrl, style: 'primary' }
+        ]
+      ]
+    };
+
+    // Try sending rich photo banner first
+    const photoRes = await sendPhoto(chatId, BANNER_URL, caption, { reply_markup: keyboard });
+    if (!photoRes || !photoRes.ok) {
+      return sendMessage(chatId, caption, { reply_markup: keyboard });
+    }
+    return photoRes;
   }
 
   if (text === '/help') {
@@ -60,8 +65,8 @@ export async function handleIncomingMessage(message) {
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket' }],
-            [{ text: en.buttons.faq, callback_data: 'action:faq' }]
+            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }],
+            [{ text: en.buttons.faq, callback_data: 'action:faq', style: 'primary' }]
           ]
         }
       }
@@ -97,7 +102,7 @@ export async function handleIncomingMessage(message) {
     await sendMessage(chatId, en.ticketPrompt.created(ticket.id), {
       reply_markup: {
         inline_keyboard: [
-          [{ text: en.buttons.checkStatus, callback_data: 'action:check_status' }],
+          [{ text: en.buttons.checkStatus, callback_data: 'action:check_status', style: 'primary' }],
           [{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]
         ]
       }
@@ -109,7 +114,7 @@ export async function handleIncomingMessage(message) {
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '✅ Mark Resolved', callback_data: `admin:resolve:${ticket.id}` }
+              { text: '✅ Mark Resolved', callback_data: `admin:resolve:${ticket.id}`, style: 'success' }
             ]
           ]
         }
@@ -136,11 +141,11 @@ export async function handleIncomingMessage(message) {
   if (isPrivate && !text.startsWith('/')) {
     return sendMessage(
       chatId,
-      `Hello! To open a support ticket or ask a question, please use the button below:`,
+      `👋 Hello! To open a support ticket or ask a question, please tap below:`,
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket' }],
+            [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }],
             [{ text: en.buttons.backToMenu, callback_data: 'action:main_menu' }]
           ]
         }

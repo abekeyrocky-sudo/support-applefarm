@@ -10,33 +10,33 @@ export function escapeHtml(str) {
 export const en = {
   welcome: {
     title: "🍎 <b>Welcome to Apple Farm Support Center!</b>",
-    subtitle: "We are here to help you 24/7 with any questions, withdrawal inquiries, or feedback regarding Apple Farm.",
-    chooseOption: "Please choose an option below to get instant help or speak with an agent:"
+    subtitle: "We are here 24/7 to help you with withdrawals, referral questions, and gameplay issues.",
+    chooseOption: "👉 <b>Select an option below to get instant help:</b>"
   },
 
   buttons: {
-    openTicket: "🎟 Open Support Ticket",
-    checkStatus: "🔍 Check Ticket Status",
-    faq: "❓ FAQs & Rules",
-    playGame: "🎮 Play Apple Farm",
-    community: "📢 Official Channel",
-    backToMenu: "🔙 Main Menu",
+    openTicket: "🎟️ Open Support Ticket ➔",
+    checkStatus: "🔍 Check My Tickets 📌",
+    faq: "❓ FAQs & Rules 📚",
+    playGame: "🎮 Play Apple Farm 🍏",
+    community: "📢 Official Channel 🚀",
+    backToMenu: "🔙 Back to Menu",
     cancel: "❌ Cancel",
     confirmSubmit: "✅ Submit Ticket"
   },
 
   categories: {
     title: "📂 <b>Select Your Issue Category:</b>",
-    prompt: "Choose the topic that best describes your issue:",
-    withdraw: "💳 Withdrawal / TON Payout",
-    referral: "👥 Referral Bonus / Friends",
-    spinTask: "🎡 Wheel Spin / Task Bug",
-    other: "💬 General / Account Issue"
+    prompt: "Choose the topic that best matches your problem:",
+    withdraw: "💳 Withdrawal / TON Payout 💎",
+    referral: "👥 Referral Bonus & Friends 🎁",
+    spinTask: "🎡 Wheel Spin & Tasks Bug 🎯",
+    other: "💬 General & Account Issue 🛡️"
   },
 
   ticketPrompt: {
-    description: "✍️ <b>Please describe your issue in detail:</b>\n\nInclude any relevant details (e.g., your TON wallet address, transaction amount, or error message). You can also attach a <b>screenshot</b> directly with your message.",
-    created: (ticketId) => `🎉 <b>Your Ticket has been submitted successfully!</b>\n\n🔖 <b>Ticket ID:</b> <code>${ticketId}</code>\n⏳ <b>Status:</b> In Review\n\nOur support team has received your ticket and will reply directly to your Telegram inbox. Thank you for your patience!`,
+    description: "✍️ <b>Please describe your issue in detail:</b>\n\nInclude any relevant details (e.g. your TON wallet address, transaction amount, or error message). You can also attach a <b>screenshot</b> directly with your message.",
+    created: (ticketId) => `🎉 <b>Your Ticket has been submitted successfully!</b>\n\n🔖 <b>Ticket ID:</b> <code>${ticketId}</code>\n⏳ <b>Status:</b> <b>IN REVIEW</b>\n\nOur support team has received your ticket and will reply directly to your Telegram inbox. Thank you for your patience! 🍏`,
     cancelled: "❌ Ticket creation was cancelled. Feel free to reach out anytime!"
   },
 
@@ -50,14 +50,14 @@ export const en = {
       `⏱ <b>Submitted:</b> ${new Date(ticket.createdAt).toUTCString()}\n` +
       `📌 <b>Status:</b> <b>${ticket.status.toUpperCase()}</b>\n` +
       `📝 <b>Issue:</b> ${escapeHtml(ticket.message)}\n` +
-      (ticket.adminReply ? `\n💬 <b>Admin Response:</b>\n<i>${escapeHtml(ticket.adminReply)}</i>` : `\n⏳ Our support team is currently investigating your ticket.`)
+      (ticket.adminReply ? `\n💬 <b>Admin Response:</b>\n<i>${escapeHtml(ticket.adminReply)}</i>` : `\n⏳ <i>Our support team is currently investigating your ticket.</i>`)
   },
 
   businessAutoReply: {
     greeting: (userName) => 
       `👋 <b>Hello ${escapeHtml(userName || 'there')}!</b>\n\n` +
-      `Thank you for contacting <b>Apple Farm Official Support</b>.\n\n` +
-      `How can we assist you today? Please reply with your issue details or wallet address so our team can assist you as quickly as possible!`
+      `Thank you for contacting <b>Apple Farm Official Support</b> 🍏\n\n` +
+      `How can we assist you today? Please reply with your issue details or wallet address, or tap the button below to open a support ticket directly with our team!`
   },
 
   faq: {
