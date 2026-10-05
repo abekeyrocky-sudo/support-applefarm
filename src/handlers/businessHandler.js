@@ -16,7 +16,7 @@ const OWNER_PAUSE_DURATION_MS = 10 * 60 * 1000; // 10 minutes pause if owner typ
  * Handle Telegram Business Connection update
  */
 export async function handleBusinessConnection(connection) {
-  console.log(`💼 [Business Connection] ID: ${connection.id}, User: ${connection.user?.id}, CanReply: ${connection.can_reply}, IsEnabled: ${connection.is_enabled}`);
+  console.log(`[Business Connection] ID: ${connection.id}, User: ${connection.user?.id}, CanReply: ${connection.can_reply}, IsEnabled: ${connection.is_enabled}`);
 }
 
 /**
@@ -53,7 +53,7 @@ export async function handleBusinessMessage(businessMessage) {
     return;
   }
 
-  // 4. Send Auto-Reply on behalf of the account with colorful inline buttons
+  // 4. Send Auto-Reply on behalf of the account with clean professional buttons (no emojis)
   lastAutoReply.set(senderId, now);
 
   const replyText = en.businessAutoReply.greeting(senderName);
@@ -63,13 +63,13 @@ export async function handleBusinessMessage(businessMessage) {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: '🎟️ Open Support Center Bot ➔', url: 'https://t.me/AppleFarm_Support_bot?start=support' }
+          { text: 'Open Support Bot', url: 'https://t.me/AppleFarm_Support_bot?start=support' }
         ],
         [
-          { text: '🍏 Play Apple Farm Mini App', url: config.miniAppUrl }
+          { text: 'Play Apple Farm', url: config.miniAppUrl }
         ],
         [
-          { text: '📢 Official Community Channel', url: config.channelUrl }
+          { text: 'Official Channel', url: config.channelUrl }
         ]
       ]
     }
@@ -78,11 +78,11 @@ export async function handleBusinessMessage(businessMessage) {
   // 5. Notify the Support Admin that a player messaged via Telegram Business
   if (config.adminChatId) {
     const notifyAdmin = 
-      `💼 <b>New Telegram Business Customer Message</b>\n` +
+      `<b>New Telegram Business Customer Message</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 <b>From:</b> ${escapeHtml(senderName)} (@${escapeHtml(businessMessage.from?.username || 'N/A')})\n` +
-      `🆔 <b>ID:</b> <code>${senderId}</code>\n` +
-      `💬 <b>Message:</b> "${escapeHtml(text)}"\n` +
+      `<b>From:</b> ${escapeHtml(senderName)} (@${escapeHtml(businessMessage.from?.username || 'N/A')})\n` +
+      `<b>ID:</b> <code>${senderId}</code>\n` +
+      `<b>Message:</b> "${escapeHtml(text)}"\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `<i>Automated greeting with Support Bot button was sent.</i>`;
 
@@ -90,7 +90,7 @@ export async function handleBusinessMessage(businessMessage) {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: '💬 Open Chat With User', url: `tg://user?id=${senderId}` }
+            { text: 'Open Chat With User', url: `tg://user?id=${senderId}` }
           ]
         ]
       }

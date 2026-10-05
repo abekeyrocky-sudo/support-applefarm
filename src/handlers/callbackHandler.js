@@ -62,10 +62,10 @@ export async function handleCallbackQuery(callbackQuery) {
     await answerCallbackQuery(queryId);
     const catKey = data.replace('cat:', '');
     const categoryName = {
-      withdraw: 'Withdrawal / TON Payout 💎',
-      referral: 'Referral Bonus / Friends 🎁',
-      spintask: 'Wheel Spin & Tasks Bug 🎯',
-      other: 'General & Account Issue 🛡️'
+      withdraw: 'Withdrawal / TON Payout',
+      referral: 'Referral Bonus / Friends',
+      spintask: 'Wheel Spin & Tasks Bug',
+      other: 'General & Account Issue'
     }[catKey] || 'General Support';
 
     // Store state in session
@@ -77,7 +77,7 @@ export async function handleCallbackQuery(callbackQuery) {
     return updateMessage(
       chatId, 
       message, 
-      `📂 <b>Selected Category:</b> ${escapeHtml(categoryName)}\n\n${en.ticketPrompt.description}`,
+      `<b>Selected Category:</b> ${escapeHtml(categoryName)}\n\n${en.ticketPrompt.description}`,
       {
         reply_markup: {
           inline_keyboard: [
@@ -132,10 +132,10 @@ export async function handleCallbackQuery(callbackQuery) {
     const index = parseInt(data.replace('faq:item_', ''), 10);
     const item = en.faq.items[index];
     if (item) {
-      return updateMessage(chatId, message, `❓ <b>${escapeHtml(item.q)}</b>\n\n${escapeHtml(item.a)}`, {
+      return updateMessage(chatId, message, `<b>${escapeHtml(item.q)}</b>\n\n${escapeHtml(item.a)}`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🔙 Back to FAQs', callback_data: 'action:faq', style: 'primary' }],
+            [{ text: en.buttons.backToFaq, callback_data: 'action:faq', style: 'primary' }],
             [{ text: en.buttons.openTicket, callback_data: 'action:open_ticket', style: 'success' }]
           ]
         }
@@ -153,12 +153,12 @@ export async function handleCallbackQuery(callbackQuery) {
       await resolveTicket(ticketId, 'Resolved by Admin', 'resolved');
 
       // Edit admin card
-      await updateMessage(chatId, message, `✅ <b>TICKET RESOLVED</b>\nTicket ID: <code>${ticketId}</code>\nUser: <code>${ticket.userId}</code>`);
+      await updateMessage(chatId, message, `<b>TICKET RESOLVED</b>\nTicket ID: <code>${ticketId}</code>\nUser: <code>${ticket.userId}</code>`);
 
       // Notify User
       await sendMessage(
         ticket.userId,
-        `✅ <b>Good news! Your ticket #${ticketId} has been resolved by our support team.</b>\n\nIf you have any further questions, feel free to open a new ticket anytime. 🍏`
+        `<b>Good news! Your ticket #${ticketId} has been resolved by our support team.</b>\n\nIf you have any further questions, feel free to open a new ticket anytime.`
       );
     }
   }

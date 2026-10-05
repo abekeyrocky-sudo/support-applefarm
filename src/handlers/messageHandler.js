@@ -114,7 +114,7 @@ export async function handleIncomingMessage(message) {
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '✅ Mark Resolved', callback_data: `admin:resolve:${ticket.id}`, style: 'success' }
+              { text: 'Mark as Resolved', callback_data: `admin:resolve:${ticket.id}`, style: 'success' }
             ]
           ]
         }
